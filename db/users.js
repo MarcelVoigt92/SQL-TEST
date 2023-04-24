@@ -9,16 +9,37 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         autoIncrement: true,
       },
-      username: {
+      name: {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       password: {
         type: DataTypes.STRING,
+        allowNull: true,
         get() {
           return () => this.getDataValue("password");
         },
       },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      imgurl: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+      },
+      interests: {
+        type: DataTypes.ARRAY(DataTypes.JSONB),
+        allowNull: true,
+      },
+      xp: { type: DataTypes.INTEGER, defaultValue: 0 },
+      level: { type: DataTypes.INTEGER, defaultValue: 0 },
+      coins: { type: DataTypes.INTEGER, defaultValue: 0 },
+      role: { type: DataTypes.STRING, defaultValue: "user" },
     },
     {
       hooks: {
@@ -28,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         beforeBulkUpdate: async function (user) {
           if (user.attributes.password) {
-            const sold = await bcrypt.genSalt(12);
+            const salt = await bcrypt.genSalt(12);
             user.attributes.password = await bcrypt.hash(
               user.attributes.password,
               salt
@@ -38,10 +59,12 @@ module.exports = (sequelize, DataTypes) => {
       },
     }
   );
-  //   User.associate = (models) => {
-  //     User.hasMany(models.Post);
-  //     User.hasMany(models.Comment);
-  //     User.hasMany(models.Like);
-  //   };
+
+  User.associate = (models) => {
+    User.hasMany(models.Post);
+    User.hasMany(models.Comment);
+    User.hasMany(models.Like);
+  };
+
   return User;
 };
